@@ -1,0 +1,21 @@
+<!doctype html><html lang="pt-BR"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f2b900"><title>Kiwify FK — Simulador</title>
+<link rel="manifest" href="manifest.json">
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f6f8;color:#20242a}header{background:#111;color:#fff;padding:22px 18px;border-bottom:4px solid #f2b900}h1{margin:0;font-size:24px}header small{opacity:.7}main{max-width:520px;margin:auto;padding:18px}.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 5px 20px #0001}.notice{background:#fff8d9;border-left:4px solid #f2b900;padding:12px;border-radius:10px;font-size:13px}label{display:block;font-weight:bold;margin:14px 0 7px}input,textarea,button{width:100%;padding:13px;border-radius:11px;border:1px solid #ddd;font-size:16px}textarea{min-height:90px;resize:vertical}button{border:0;background:#f2b900;color:#111;font-weight:bold;margin-top:15px}button.secondary{background:#eee}.preview{background:#17191d;color:#fff;border-radius:15px;padding:15px;margin-top:14px}#status{margin-top:12px;font-size:14px}</style>
+</head><body><header><h1>Kiwify FK</h1><small>Central de notificações fictícias</small></header><main>
+<div class="card"><div class="notice">SIMULAÇÃO: as notificações são testes enviados somente para este aparelho.</div>
+<label>Título</label><input id="title" value="Nova venda realizada">
+<label>Mensagem</label><textarea id="message">Produto: Curso Premium
+Valor: R$ 497,00</textarea>
+<label>Nome exibido</label><input id="appName" value="Kiwify FK">
+<button id="permission">🔔 Permitir notificações</button><button id="notify">📲 Enviar teste agora</button><div id="status"></div></div>
+<div class="card"><b>Prévia</b><div class="preview"><strong id="pTitle"></strong><br><span id="pMsg"></span></div></div>
+</main><script>
+let reg=null;const $=id=>document.getElementById(id);
+function preview(){$('pTitle').textContent=$('title').value;$('pMsg').innerHTML=$('message').value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\n','<br>')}
+async function setup(){if(!('serviceWorker'in navigator)||!('Notification'in window)){$('status').textContent='❌ Este navegador não oferece o recurso necessário.';return}try{reg=await navigator.serviceWorker.register('./sw.js');await navigator.serviceWorker.ready}catch(e){$('status').textContent='❌ Não foi possível ativar o serviço de notificações.'}}
+$('permission').onclick=async()=>{if(!reg)await setup();if(Notification.permission==='granted'){$('status').textContent='✅ Permissão já está ativa.';return}const p=await Notification.requestPermission();$('status').textContent=p==='granted'?'✅ Permissão concedida. Agora toque em Enviar teste.':'⚠️ Permissão não concedida.'};
+$('notify').onclick=async()=>{if(!reg)await setup();if(Notification.permission!=='granted'){$('status').textContent='⚠️ Primeiro toque em “Permitir notificações”.';return}try{await reg.showNotification($('title').value||'Nova notificação',{body:$('message').value,tag:'kiwify-fk-'+Date.now(),vibrate:[200,100,200]});$('status').textContent='✅ Teste enviado. Verifique a central de notificações do Android.'}catch(e){$('status').textContent='❌ O Android/Chrome bloqueou: '+e.message}};
+$('title').oninput=preview;$('message').oninput=preview;setup();preview();
+</script></body></html>
